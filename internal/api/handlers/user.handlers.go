@@ -54,5 +54,47 @@ func (h *userHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	rsp := LoginResponse{
+		Email:              user.Email,
+		IsProfileCompleted: user.IsProfileCompleted,
+	}
+
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	Email              string `json:"email"`
+	IsProfileCompleted bool   `json:"is_profile_completed"`
+}
+
+func (h *userHandler) Login(ctx *gin.Context) {
+	var req LoginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.store.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	err = util.CheckPassword(user.PasswordHash, req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	rsp := LoginResponse{
+		Email:              user.Email,
+		IsProfileCompleted: user.IsProfileCompleted,
+	}
+
+	ctx.JSON(http.StatusOK, rsp)
 }

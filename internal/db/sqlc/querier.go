@@ -12,9 +12,14 @@ type Querier interface {
 	CreateBranch(ctx context.Context, arg CreateBranchParams) (Branch, error)
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
 	CreateSemester(ctx context.Context, arg CreateSemesterParams) (Semester, error)
+	CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetBranchByCode(ctx context.Context, code string) (Branch, error)
 	GetDepartmentByName(ctx context.Context, name string) (Department, error)
+	GetSemesterByNumberAndBranch(ctx context.Context, arg GetSemesterByNumberAndBranchParams) (Semester, error)
+	GetStudentByRollNo(ctx context.Context, rollNo string) (Student, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	UpdateUserProfileCompleted(ctx context.Context, arg UpdateUserProfileCompletedParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -41,3 +41,28 @@ func (q *Queries) CreateSemester(ctx context.Context, arg CreateSemesterParams) 
 	)
 	return i, err
 }
+
+const getSemesterByNumberAndBranch = `-- name: GetSemesterByNumberAndBranch :one
+SELECT id, number, name, branch_id, created_at, updated_at FROM semesters
+WHERE number = $1 AND branch_id = $2
+LIMIT 1
+`
+
+type GetSemesterByNumberAndBranchParams struct {
+	Number   int32     `json:"number"`
+	BranchID uuid.UUID `json:"branch_id"`
+}
+
+func (q *Queries) GetSemesterByNumberAndBranch(ctx context.Context, arg GetSemesterByNumberAndBranchParams) (Semester, error) {
+	row := q.db.QueryRow(ctx, getSemesterByNumberAndBranch, arg.Number, arg.BranchID)
+	var i Semester
+	err := row.Scan(
+		&i.ID,
+		&i.Number,
+		&i.Name,
+		&i.BranchID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

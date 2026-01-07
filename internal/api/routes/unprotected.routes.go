@@ -11,9 +11,12 @@ func SetupUnProtectedRoutes(router *gin.Engine, store db.Store) {
 	deptHandler := handlers.NewDepartmentHandler(store)
 	branchHandler := handlers.NewBranchHandler(store)
 	semesterHandler := handlers.NewSemesterHandler(store)
+	studentHandler := handlers.NewStudentHandler(store)
 
 	// Create a single user
 	router.POST("/register", userHandler.CreateUser)
+	// User login
+	router.POST("/login", userHandler.Login)
 	// Create a single department
 	router.POST("/dept_reg", deptHandler.CreateDepartment)
 	// Create multiple departments
@@ -24,4 +27,8 @@ func SetupUnProtectedRoutes(router *gin.Engine, store db.Store) {
 	router.POST("/branch_bulk_reg", branchHandler.BulkCreateBranches)
 	// Create a single semester
 	router.POST("/semester_reg", semesterHandler.CreateSemester)
+	// Create a single student
+	router.POST("/student_reg", studentHandler.CreateStudent)
+	// Get student by roll number
+	router.GET("/student/:roll_no", studentHandler.GetStudentByRollNo)
 }
