@@ -12,6 +12,7 @@ func SetupUnProtectedRoutes(router *gin.Engine, store db.Store) {
 	branchHandler := handlers.NewBranchHandler(store)
 	semesterHandler := handlers.NewSemesterHandler(store)
 	studentHandler := handlers.NewStudentHandler(store)
+	teacherHandler := handlers.NewTeacherHandler(store)
 
 	// Create a single user
 	router.POST("/register", userHandler.CreateUser)
@@ -31,4 +32,8 @@ func SetupUnProtectedRoutes(router *gin.Engine, store db.Store) {
 	router.POST("/student_reg", studentHandler.CreateStudent)
 	// Get student by roll number
 	router.GET("/student/:roll_no", studentHandler.GetStudentByRollNo)
+	// Create a single teacher
+	router.POST("/teacher_reg", teacherHandler.CreateTeacher)
+	// Get teacher by card number
+	router.GET("/teacher/:card_no", teacherHandler.GetTeacherByCardNo)
 }
