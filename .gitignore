@@ -1,0 +1,81 @@
+# =========================
+# Go build artifacts
+# =========================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# =========================
+# Binaries / build folders
+# =========================
+/bin/
+/build/
+/dist/
+
+# =========================
+# Environment & secrets (VERY IMPORTANT for bank apps)
+# =========================
+.env
+app.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+*.trace
+
+# =========================
+# Database files (local/dev only)
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+/data/
+/tmp/
+
+# =========================
+# Migrations (ignore generated state files, keep SQL)
+# =========================
+*.lock
+
+# =========================
+# Dependency directories (if any)
+# =========================
+vendor/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Editor / IDE files
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# =========================
+# Test coverage
+# =========================
+coverage.out
+coverage.html
+
+# =========================
+# Docker
+# =========================
+docker-data/

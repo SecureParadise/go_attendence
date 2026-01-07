@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Department of Applied Sciences",
+        "hod_name": "Bishow Raj Tiwari",
+        "dhod_name": "Deepak Mishra"
+    },
+    {
+        "name": "Department of Civil Engineering",
+        "hod_name": "Subhash Sapkota Chhetri",
+        "dhod_name": "Sabina Paudel"
+    },
+    {
+        "name": "Department of Electrical Engineering",
+        "hod_name": "Bhriju Raj Bhattarai",
+        "dhod_name": "null"
+    },
+    {
+        "name": "Department of Electronics & Computer Engineering",
+        "hod_name": "Hom Nath Tiwari",
+        "dhod_name": "Ramesh Thapa"
+    },
+    {
+        "name": "Department of Mechanical & Automobile Engineering",
+        "hod_name": "Shacheendra Kishor Labh",
+        "dhod_name": "Kiran Giri"
+    },
+    {
+        "name": "Department of Geomatics Engineering",
+        "hod_name": "Umesh Bhurtyal",
+        "dhod_name": "Netra Bahadur Katuwal"
+    }
+]

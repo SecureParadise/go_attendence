@@ -1,0 +1,37 @@
+[
+    {
+        "name": "Civil Engineering",
+        "code": "BCE",
+        "department_name": "Department of Civil Engineering"
+    },
+    {
+        "name": "Electrical Engineering",
+        "code": "BEL",
+        "department_name": "Department of Electrical Engineering"
+    },
+    {
+        "name": "Electronics Communication and Information Engineering",
+        "code": "BEI",
+        "department_name": "Department of Electronics & Computer Engineering"
+    },
+    {
+        "name": "Computer Engineering",
+        "code": "BCT",
+        "department_name": "Department of Electronics & Computer Engineering"
+    },
+    {
+        "name": "Mechanical Engineering",
+        "code": "BME",
+        "department_name": "Department of Mechanical & Automobile Engineering"
+    },
+    {
+        "name": "Automobile Engineering",
+        "code": "BAME",
+        "department_name": "Department of Mechanical & Automobile Engineering"
+    },
+    {
+        "name": "Geomatics Engineering",
+        "code": "BGE",
+        "department_name": "Department of Geomatics Engineering"
+    }
+]
