@@ -69,6 +69,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Email              string `json:"email"`
+	Role               string `json:"role"`
 	IsProfileCompleted bool   `json:"is_profile_completed"`
 }
 
@@ -93,6 +94,7 @@ func (h *userHandler) Login(ctx *gin.Context) {
 
 	rsp := LoginResponse{
 		Email:              user.Email,
+		Role:               string(user.UserRole),
 		IsProfileCompleted: user.IsProfileCompleted,
 	}
 

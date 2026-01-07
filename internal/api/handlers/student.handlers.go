@@ -45,6 +45,18 @@ func (h *studentHandler) CreateStudent(ctx *gin.Context) {
 		return
 	}
 
+	// 1.1 Check if user is a student
+	if user.UserRole != sqlc.UserroleStudent {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "only students can complete student profile"})
+		return
+	}
+
+	// 1.2 Check if profile is already completed
+	if user.IsProfileCompleted {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "profile already completed"})
+		return
+	}
+
 	// 2. Fetch branch by code
 	branch, err := h.store.GetBranchByCode(ctx, strings.ToUpper(req.BranchCode))
 	if err != nil {
