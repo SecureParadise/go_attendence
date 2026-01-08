@@ -19,7 +19,7 @@ INSERT INTO branches (
 ) VALUES (
     $1, $2, $3
 )
-RETURNING id, name, code, department_id, created_at, updated_at
+RETURNING id, name, code, department_id, created_at, updated_at, deleted_at
 `
 
 type CreateBranchParams struct {
@@ -38,13 +38,14 @@ func (q *Queries) CreateBranch(ctx context.Context, arg CreateBranchParams) (Bra
 		&i.DepartmentID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getBranchByCode = `-- name: GetBranchByCode :one
-SELECT id, name, code, department_id, created_at, updated_at FROM branches
-WHERE code = $1 LIMIT 1
+SELECT id, name, code, department_id, created_at, updated_at, deleted_at FROM branches
+WHERE code = $1 AND deleted_at IS NULL LIMIT 1
 `
 
 func (q *Queries) GetBranchByCode(ctx context.Context, code string) (Branch, error) {
@@ -57,6 +58,7 @@ func (q *Queries) GetBranchByCode(ctx context.Context, code string) (Branch, err
 		&i.DepartmentID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

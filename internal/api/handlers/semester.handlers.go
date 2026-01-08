@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/SecureParadise/go_attendence/internal/api/middleware"
 	"github.com/SecureParadise/go_attendence/internal/db"
 	"github.com/SecureParadise/go_attendence/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
@@ -28,16 +29,16 @@ type CreateSemesterRequest struct {
 func (h *semesterHandler) CreateSemester(ctx *gin.Context) {
 	var req CreateSemesterRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	sem, err := h.createSemesterInternal(ctx, h.store, req)
 	if err != nil {
 		if err.Error() == "Branch not found" {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.Error(middleware.NewAPIError(http.StatusNotFound, "branch not found", err))
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ctx.Error(err)
 		}
 		return
 	}

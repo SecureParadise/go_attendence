@@ -13,6 +13,95 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AttendanceMethod string
+
+const (
+	AttendanceMethodManual      AttendanceMethod = "manual"
+	AttendanceMethodQr          AttendanceMethod = "qr"
+	AttendanceMethodFace        AttendanceMethod = "face"
+	AttendanceMethodRfid        AttendanceMethod = "rfid"
+	AttendanceMethodFingerprint AttendanceMethod = "fingerprint"
+)
+
+func (e *AttendanceMethod) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AttendanceMethod(s)
+	case string:
+		*e = AttendanceMethod(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AttendanceMethod: %T", src)
+	}
+	return nil
+}
+
+type NullAttendanceMethod struct {
+	AttendanceMethod AttendanceMethod `json:"attendance_method"`
+	Valid            bool             `json:"valid"` // Valid is true if AttendanceMethod is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAttendanceMethod) Scan(value interface{}) error {
+	if value == nil {
+		ns.AttendanceMethod, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AttendanceMethod.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAttendanceMethod) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AttendanceMethod), nil
+}
+
+type AttendanceStatus string
+
+const (
+	AttendanceStatusPresent AttendanceStatus = "present"
+	AttendanceStatusAbsent  AttendanceStatus = "absent"
+	AttendanceStatusLate    AttendanceStatus = "late"
+	AttendanceStatusExcused AttendanceStatus = "excused"
+)
+
+func (e *AttendanceStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AttendanceStatus(s)
+	case string:
+		*e = AttendanceStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AttendanceStatus: %T", src)
+	}
+	return nil
+}
+
+type NullAttendanceStatus struct {
+	AttendanceStatus AttendanceStatus `json:"attendance_status"`
+	Valid            bool             `json:"valid"` // Valid is true if AttendanceStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAttendanceStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.AttendanceStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AttendanceStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAttendanceStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AttendanceStatus), nil
+}
+
 type Userrole string
 
 const (
@@ -59,78 +148,138 @@ func (ns NullUserrole) Value() (driver.Value, error) {
 	return string(ns.Userrole), nil
 }
 
+type Attendance struct {
+	ID         uuid.UUID          `json:"id"`
+	StudentID  uuid.UUID          `json:"student_id"`
+	SubjectID  uuid.UUID          `json:"subject_id"`
+	TeacherID  uuid.UUID          `json:"teacher_id"`
+	SemesterID uuid.UUID          `json:"semester_id"`
+	Date       pgtype.Date        `json:"date"`
+	CheckIn    pgtype.Timestamptz `json:"check_in"`
+	CheckOut   pgtype.Timestamptz `json:"check_out"`
+	Status     AttendanceStatus   `json:"status"`
+	Method     AttendanceMethod   `json:"method"`
+	Remarks    pgtype.Text        `json:"remarks"`
+	CreatedAt  time.Time          `json:"created_at"`
+	UpdatedAt  time.Time          `json:"updated_at"`
+	DeletedAt  pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type AttendanceRecord struct {
+	ID        uuid.UUID          `json:"id"`
+	StudentID uuid.UUID          `json:"student_id"`
+	SessionID uuid.UUID          `json:"session_id"`
+	ScanTime  pgtype.Timestamptz `json:"scan_time"`
+	Score     pgtype.Numeric     `json:"score"`
+	Status    AttendanceStatus   `json:"status"`
+	Method    AttendanceMethod   `json:"method"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Branch struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	Code         string    `json:"code"`
-	DepartmentID uuid.UUID `json:"department_id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uuid.UUID          `json:"id"`
+	Name         string             `json:"name"`
+	Code         string             `json:"code"`
+	DepartmentID uuid.UUID          `json:"department_id"`
+	CreatedAt    time.Time          `json:"created_at"`
+	UpdatedAt    time.Time          `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ClassSession struct {
+	ID             uuid.UUID          `json:"id"`
+	SubjectID      uuid.UUID          `json:"subject_id"`
+	TeacherID      uuid.UUID          `json:"teacher_id"`
+	SemesterID     uuid.UUID          `json:"semester_id"`
+	ScheduledStart time.Time          `json:"scheduled_start"`
+	ActualStart    time.Time          `json:"actual_start"`
+	CreatedAt      time.Time          `json:"created_at"`
+	UpdatedAt      time.Time          `json:"updated_at"`
+	DeletedAt      pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Department struct {
-	ID        uuid.UUID   `json:"id"`
-	Name      string      `json:"name"`
-	HodName   pgtype.Text `json:"hod_name"`
-	HodID     pgtype.UUID `json:"hod_id"`
-	DhodName  pgtype.Text `json:"dhod_name"`
-	DhodID    pgtype.UUID `json:"dhod_id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID        uuid.UUID          `json:"id"`
+	Name      string             `json:"name"`
+	HodName   pgtype.Text        `json:"hod_name"`
+	HodID     pgtype.UUID        `json:"hod_id"`
+	DhodName  pgtype.Text        `json:"dhod_name"`
+	DhodID    pgtype.UUID        `json:"dhod_id"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Enrollment struct {
+	ID           uuid.UUID          `json:"id"`
+	StudentID    uuid.UUID          `json:"student_id"`
+	BranchID     uuid.UUID          `json:"branch_id"`
+	SemesterID   uuid.UUID          `json:"semester_id"`
+	AcademicYear string             `json:"academic_year"`
+	IsActive     bool               `json:"is_active"`
+	CreatedAt    time.Time          `json:"created_at"`
+	UpdatedAt    time.Time          `json:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Semester struct {
-	ID        uuid.UUID `json:"id"`
-	Number    int32     `json:"number"`
-	Name      string    `json:"name"`
-	BranchID  uuid.UUID `json:"branch_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID          `json:"id"`
+	Number    int32              `json:"number"`
+	Name      string             `json:"name"`
+	BranchID  uuid.UUID          `json:"branch_id"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Student struct {
-	ID                uuid.UUID   `json:"id"`
-	RollNo            string      `json:"roll_no"`
-	FirstName         string      `json:"first_name"`
-	MiddleName        pgtype.Text `json:"middle_name"`
-	LastName          string      `json:"last_name"`
-	Image             pgtype.Text `json:"image"`
-	Batch             pgtype.Text `json:"batch"`
-	UserID            uuid.UUID   `json:"user_id"`
-	BranchID          uuid.UUID   `json:"branch_id"`
-	CurrentSemesterID pgtype.UUID `json:"current_semester_id"`
-	RfidTagID         pgtype.Text `json:"rfid_tag_id"`
-	FingerprintHash   pgtype.Text `json:"fingerprint_hash"`
-	CreatedAt         time.Time   `json:"created_at"`
-	UpdatedAt         time.Time   `json:"updated_at"`
+	ID                uuid.UUID          `json:"id"`
+	RollNo            string             `json:"roll_no"`
+	FirstName         string             `json:"first_name"`
+	MiddleName        pgtype.Text        `json:"middle_name"`
+	LastName          string             `json:"last_name"`
+	Image             pgtype.Text        `json:"image"`
+	Batch             pgtype.Text        `json:"batch"`
+	UserID            uuid.UUID          `json:"user_id"`
+	BranchID          uuid.UUID          `json:"branch_id"`
+	CurrentSemesterID pgtype.UUID        `json:"current_semester_id"`
+	RfidTagID         pgtype.Text        `json:"rfid_tag_id"`
+	FingerprintHash   pgtype.Text        `json:"fingerprint_hash"`
+	CreatedAt         time.Time          `json:"created_at"`
+	UpdatedAt         time.Time          `json:"updated_at"`
+	DeletedAt         pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Subject struct {
-	ID         uuid.UUID   `json:"id"`
-	Name       string      `json:"name"`
-	Code       string      `json:"code"`
-	IsLab      bool        `json:"is_lab"`
-	Credits    pgtype.Int4 `json:"credits"`
-	BranchID   uuid.UUID   `json:"branch_id"`
-	SemesterID uuid.UUID   `json:"semester_id"`
-	TeacherID  uuid.UUID   `json:"teacher_id"`
-	CreatedAt  time.Time   `json:"created_at"`
-	UpdatedAt  time.Time   `json:"updated_at"`
+	ID         uuid.UUID          `json:"id"`
+	Name       string             `json:"name"`
+	Code       string             `json:"code"`
+	IsLab      bool               `json:"is_lab"`
+	Credits    pgtype.Int4        `json:"credits"`
+	BranchID   uuid.UUID          `json:"branch_id"`
+	SemesterID uuid.UUID          `json:"semester_id"`
+	TeacherID  uuid.UUID          `json:"teacher_id"`
+	CreatedAt  time.Time          `json:"created_at"`
+	UpdatedAt  time.Time          `json:"updated_at"`
+	DeletedAt  pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type Teacher struct {
-	ID              uuid.UUID   `json:"id"`
-	CardNo          string      `json:"card_no"`
-	FirstName       string      `json:"first_name"`
-	MiddleName      pgtype.Text `json:"middle_name"`
-	LastName        string      `json:"last_name"`
-	Image           pgtype.Text `json:"image"`
-	UserID          uuid.UUID   `json:"user_id"`
-	DepartmentID    uuid.UUID   `json:"department_id"`
-	RfidTagID       pgtype.Text `json:"rfid_tag_id"`
-	FingerprintHash pgtype.Text `json:"fingerprint_hash"`
-	CreatedAt       time.Time   `json:"created_at"`
-	UpdatedAt       time.Time   `json:"updated_at"`
+	ID              uuid.UUID          `json:"id"`
+	CardNo          string             `json:"card_no"`
+	FirstName       string             `json:"first_name"`
+	MiddleName      pgtype.Text        `json:"middle_name"`
+	LastName        string             `json:"last_name"`
+	Image           pgtype.Text        `json:"image"`
+	UserID          uuid.UUID          `json:"user_id"`
+	DepartmentID    uuid.UUID          `json:"department_id"`
+	RfidTagID       pgtype.Text        `json:"rfid_tag_id"`
+	FingerprintHash pgtype.Text        `json:"fingerprint_hash"`
+	CreatedAt       time.Time          `json:"created_at"`
+	UpdatedAt       time.Time          `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type User struct {
@@ -145,4 +294,6 @@ type User struct {
 	PasswordChangedAt  pgtype.Timestamptz `json:"password_changed_at"`
 	CreatedAt          time.Time          `json:"created_at"`
 	UpdatedAt          time.Time          `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	DepartmentID       pgtype.UUID        `json:"department_id"`
 }

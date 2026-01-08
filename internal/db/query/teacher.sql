@@ -14,5 +14,5 @@ RETURNING *;
 
 -- name: GetTeacherByCardNo :one
 SELECT * FROM teachers
-WHERE card_no = $1
+WHERE card_no = $1 AND deleted_at IS NULL
 LIMIT 1;

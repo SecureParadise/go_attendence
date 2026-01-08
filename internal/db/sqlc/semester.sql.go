@@ -19,7 +19,7 @@ INSERT INTO semesters(
 )VALUES(
     $1,$2,$3
 )
-RETURNING id, number, name, branch_id, created_at, updated_at
+RETURNING id, number, name, branch_id, created_at, updated_at, deleted_at
 `
 
 type CreateSemesterParams struct {
@@ -38,13 +38,14 @@ func (q *Queries) CreateSemester(ctx context.Context, arg CreateSemesterParams) 
 		&i.BranchID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getSemesterByNumberAndBranch = `-- name: GetSemesterByNumberAndBranch :one
-SELECT id, number, name, branch_id, created_at, updated_at FROM semesters
-WHERE number = $1 AND branch_id = $2
+SELECT id, number, name, branch_id, created_at, updated_at, deleted_at FROM semesters
+WHERE number = $1 AND branch_id = $2 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -63,6 +64,7 @@ func (q *Queries) GetSemesterByNumberAndBranch(ctx context.Context, arg GetSemes
 		&i.BranchID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

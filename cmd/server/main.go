@@ -10,9 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/SecureParadise/go_attendence/docs"
 	"github.com/SecureParadise/go_attendence/internal/api/routes"
 	"github.com/SecureParadise/go_attendence/internal/config"
 	"github.com/SecureParadise/go_attendence/internal/db"
+	"github.com/SecureParadise/go_attendence/internal/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,7 +25,32 @@ var interruptSignals = []os.Signal{
 	syscall.SIGINT,
 }
 
+// @title Go Attendance API
+// @version 1.0
+// @description This is a student attendance management system server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
+	// --------------------------------------------------
+	// 0️⃣ Initialize Logger
+	// --------------------------------------------------
+	util.InitLogger()
+	defer util.Logger.Sync()
+
 	// --------------------------------------------------
 	// 1️⃣ Load configuration using Viper
 	// --------------------------------------------------

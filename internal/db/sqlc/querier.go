@@ -6,21 +6,45 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
+	CreateAttendance(ctx context.Context, arg CreateAttendanceParams) (Attendance, error)
+	CreateAttendanceRecord(ctx context.Context, arg CreateAttendanceRecordParams) (AttendanceRecord, error)
 	CreateBranch(ctx context.Context, arg CreateBranchParams) (Branch, error)
+	CreateClassSession(ctx context.Context, arg CreateClassSessionParams) (ClassSession, error)
 	CreateDepartment(ctx context.Context, arg CreateDepartmentParams) (Department, error)
+	CreateEnrollment(ctx context.Context, arg CreateEnrollmentParams) (Enrollment, error)
 	CreateSemester(ctx context.Context, arg CreateSemesterParams) (Semester, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error)
 	CreateTeacher(ctx context.Context, arg CreateTeacherParams) (Teacher, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetActiveSessionBySubject(ctx context.Context, subjectID uuid.UUID) (ClassSession, error)
+	GetActiveSessionByTeacher(ctx context.Context, teacherID uuid.UUID) (ClassSession, error)
+	GetActiveSessionForStudent(ctx context.Context, studentID uuid.UUID) (ClassSession, error)
+	GetAttendance(ctx context.Context, id uuid.UUID) (Attendance, error)
+	GetAttendanceByStudentSubjectDate(ctx context.Context, arg GetAttendanceByStudentSubjectDateParams) (Attendance, error)
+	GetAttendanceRecordByStudentAndSession(ctx context.Context, arg GetAttendanceRecordByStudentAndSessionParams) (AttendanceRecord, error)
 	GetBranchByCode(ctx context.Context, code string) (Branch, error)
+	GetClassSession(ctx context.Context, id uuid.UUID) (ClassSession, error)
 	GetDepartmentByName(ctx context.Context, name string) (Department, error)
 	GetSemesterByNumberAndBranch(ctx context.Context, arg GetSemesterByNumberAndBranchParams) (Semester, error)
+	GetStudentAttendancePercentage(ctx context.Context, arg GetStudentAttendancePercentageParams) (GetStudentAttendancePercentageRow, error)
 	GetStudentByRollNo(ctx context.Context, rollNo string) (Student, error)
 	GetTeacherByCardNo(ctx context.Context, cardNo string) (Teacher, error)
+	GetTeacherByUserID(ctx context.Context, userID uuid.UUID) (Teacher, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	ListAttendanceByStudent(ctx context.Context, studentID uuid.UUID) ([]Attendance, error)
+	ListAttendanceBySubject(ctx context.Context, subjectID uuid.UUID) ([]Attendance, error)
+	ListAttendanceForReport(ctx context.Context, arg ListAttendanceForReportParams) ([]ListAttendanceForReportRow, error)
+	ListAttendanceRecordsBySession(ctx context.Context, sessionID uuid.UUID) ([]ListAttendanceRecordsBySessionRow, error)
+	ListTeachersByDepartment(ctx context.Context, departmentID uuid.UUID) ([]Teacher, error)
+	SoftDeleteAttendance(ctx context.Context, id uuid.UUID) error
+	UpdateAttendance(ctx context.Context, arg UpdateAttendanceParams) (Attendance, error)
+	UpdateAttendanceRecord(ctx context.Context, arg UpdateAttendanceRecordParams) (AttendanceRecord, error)
+	UpdateTeacherDepartment(ctx context.Context, arg UpdateTeacherDepartmentParams) (Teacher, error)
 	UpdateUserProfileCompleted(ctx context.Context, arg UpdateUserProfileCompletedParams) (User, error)
 }
 

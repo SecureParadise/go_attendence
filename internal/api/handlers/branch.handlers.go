@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/SecureParadise/go_attendence/internal/api/middleware"
 	"github.com/SecureParadise/go_attendence/internal/db"
 	"github.com/SecureParadise/go_attendence/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
@@ -27,16 +28,16 @@ func NewBranchHandler(store db.Store) *branchHandler {
 func (h *branchHandler) CreateBranch(ctx *gin.Context) {
 	var req CreateBranchRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	branch, err := h.createBranchInternal(ctx, h.store, req)
 	if err != nil {
 		if err.Error() == "department not found" {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.Error(middleware.NewAPIError(http.StatusNotFound, "department not found", err))
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ctx.Error(err)
 		}
 		return
 	}
@@ -47,7 +48,7 @@ func (h *branchHandler) CreateBranch(ctx *gin.Context) {
 func (h *branchHandler) BulkCreateBranches(ctx *gin.Context) {
 	var req []CreateBranchRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
@@ -65,9 +66,9 @@ func (h *branchHandler) BulkCreateBranches(ctx *gin.Context) {
 
 	if err != nil {
 		if err.Error() == "department not found" {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.Error(middleware.NewAPIError(http.StatusNotFound, "department not found", err))
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ctx.Error(err)
 		}
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/SecureParadise/go_attendence/internal/api/middleware"
 	"github.com/SecureParadise/go_attendence/internal/db"
 	"github.com/SecureParadise/go_attendence/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
@@ -28,36 +29,49 @@ type CreateTeacherRequest struct {
 	DepartmentName string `json:"department_name" binding:"required"`
 }
 
+// CreateTeacher completes teacher profile
+// @Summary Complete teacher profile
+// @Description Complete teacher profile with personal and academic details
+// @Tags teachers
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateTeacherRequest true "Teacher profile data"
+// @Success 201 {object} sqlc.Teacher
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /teacher_reg [post]
 func (h *teacherHandler) CreateTeacher(ctx *gin.Context) {
 	var req CreateTeacherRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	// 1. Fetch user by email
 	user, err := h.store.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "user not found", err))
 		return
 	}
 
 	// 1.1 Check if user is a teacher
 	if user.UserRole != sqlc.UserroleTeacher {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "only teachers can complete teacher profile"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "only teachers can complete teacher profile", nil))
 		return
 	}
 
 	// 1.2 Check if profile is already completed
 	if user.IsProfileCompleted {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "profile already completed"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "profile already completed", nil))
 		return
 	}
 
 	// 2. Fetch department by name
 	dept, err := h.store.GetDepartmentByName(ctx, strings.ToLower(req.DepartmentName))
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "department not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "department not found", err))
 		return
 	}
 
@@ -94,23 +108,35 @@ func (h *teacherHandler) CreateTeacher(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, teacher)
 }
 
+// GetTeacherByCardNo returns teacher details by card number
+// @Summary Get teacher by card number
+// @Description Fetch teacher details using their card number
+// @Tags teachers
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param card_no path string true "Card Number"
+// @Success 200 {object} sqlc.Teacher
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /teacher/{card_no} [get]
 func (h *teacherHandler) GetTeacherByCardNo(ctx *gin.Context) {
 	cardNo := ctx.Param("card_no")
 	if cardNo == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "card_no is required"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "card_no is required", nil))
 		return
 	}
 
 	teacher, err := h.store.GetTeacherByCardNo(ctx, cardNo)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "teacher not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "teacher not found", err))
 		return
 	}
 

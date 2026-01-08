@@ -10,5 +10,5 @@ RETURNING *;
 
 -- name: GetSemesterByNumberAndBranch :one
 SELECT * FROM semesters
-WHERE number = $1 AND branch_id = $2
+WHERE number = $1 AND branch_id = $2 AND deleted_at IS NULL
 LIMIT 1;

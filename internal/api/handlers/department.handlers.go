@@ -27,13 +27,13 @@ func NewDepartmentHandler(store db.Store) *departmentHandler {
 func (h *departmentHandler) CreateDepartment(ctx *gin.Context) {
 	var req CreateDepartmentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	department, err := h.createDepartmentInternal(ctx, h.store, req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusOK, department)
@@ -42,7 +42,7 @@ func (h *departmentHandler) CreateDepartment(ctx *gin.Context) {
 func (h *departmentHandler) BulkCreateDepartments(ctx *gin.Context) {
 	var req []CreateDepartmentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *departmentHandler) BulkCreateDepartments(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 

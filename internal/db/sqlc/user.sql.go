@@ -19,7 +19,7 @@ INSERT INTO users (
 ) VALUES (
   $1, $2,$3 
 )
-RETURNING id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at
+RETURNING id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at, deleted_at, department_id
 `
 
 type CreateUserParams struct {
@@ -43,13 +43,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DepartmentID,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at FROM users
-WHERE email = $1 LIMIT 1
+SELECT id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at, deleted_at, department_id FROM users
+WHERE email = $1 AND deleted_at IS NULL LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -67,6 +69,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DepartmentID,
 	)
 	return i, err
 }
@@ -75,7 +79,7 @@ const updateUserProfileCompleted = `-- name: UpdateUserProfileCompleted :one
 UPDATE users
 SET is_profile_completed = $2
 WHERE id = $1
-RETURNING id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at
+RETURNING id, email, password_hash, is_active, is_email_verified, is_profile_completed, user_role, last_login_at, password_changed_at, created_at, updated_at, deleted_at, department_id
 `
 
 type UpdateUserProfileCompletedParams struct {
@@ -98,6 +102,8 @@ func (q *Queries) UpdateUserProfileCompleted(ctx context.Context, arg UpdateUser
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DepartmentID,
 	)
 	return i, err
 }

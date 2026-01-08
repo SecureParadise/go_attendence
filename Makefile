@@ -20,4 +20,6 @@ migrateclsforce:
 	migrate -path internal/db/migrations -database "$(DATABASE_URL)" force 1
 sqlc:
 	sqlc generate
-.PHONY: createdb dropdb migrategen migrateup migratedown sqlc
+swagger:
+	swag init -g cmd/server/main.go
+.PHONY: createdb dropdb migrategen migrateup migratedown sqlc swagger

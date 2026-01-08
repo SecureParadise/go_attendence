@@ -16,5 +16,5 @@ RETURNING *;
 
 -- name: GetStudentByRollNo :one
 SELECT * FROM students
-WHERE roll_no = $1
+WHERE roll_no = $1 AND deleted_at IS NULL
 LIMIT 1;

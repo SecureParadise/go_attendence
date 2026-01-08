@@ -10,4 +10,4 @@ RETURNING *;
 
 -- name: GetDepartmentByName :one
 SELECT * FROM departments
-WHERE name = $1 LIMIT 1;
+WHERE name = $1 AND deleted_at IS NULL LIMIT 1;

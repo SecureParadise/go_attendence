@@ -26,7 +26,7 @@ INSERT INTO students(
 ) VALUES (
 $1,$2,$3,$4,$5,$6,$7,$8,$9
 )
-RETURNING id, roll_no, first_name, middle_name, last_name, image, batch, user_id, branch_id, current_semester_id, rfid_tag_id, fingerprint_hash, created_at, updated_at
+RETURNING id, roll_no, first_name, middle_name, last_name, image, batch, user_id, branch_id, current_semester_id, rfid_tag_id, fingerprint_hash, created_at, updated_at, deleted_at
 `
 
 type CreateStudentParams struct {
@@ -69,13 +69,14 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 		&i.FingerprintHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getStudentByRollNo = `-- name: GetStudentByRollNo :one
-SELECT id, roll_no, first_name, middle_name, last_name, image, batch, user_id, branch_id, current_semester_id, rfid_tag_id, fingerprint_hash, created_at, updated_at FROM students
-WHERE roll_no = $1
+SELECT id, roll_no, first_name, middle_name, last_name, image, batch, user_id, branch_id, current_semester_id, rfid_tag_id, fingerprint_hash, created_at, updated_at, deleted_at FROM students
+WHERE roll_no = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -97,6 +98,7 @@ func (q *Queries) GetStudentByRollNo(ctx context.Context, rollNo string) (Studen
 		&i.FingerprintHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

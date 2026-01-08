@@ -10,4 +10,4 @@ RETURNING *;
 
 -- name: GetBranchByCode :one
 SELECT * FROM branches
-WHERE code = $1 LIMIT 1;
+WHERE code = $1 AND deleted_at IS NULL LIMIT 1;

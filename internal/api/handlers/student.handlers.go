@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/SecureParadise/go_attendence/internal/api/middleware"
 	"github.com/SecureParadise/go_attendence/internal/db"
 	"github.com/SecureParadise/go_attendence/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
@@ -31,36 +32,49 @@ type CreateStudentRequest struct {
 	SemesterNo int32  `json:"semester_no" binding:"required"`
 }
 
+// CreateStudent completes student profile
+// @Summary Complete student profile
+// @Description Complete student profile with personal and academic details
+// @Tags students
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateStudentRequest true "Student profile data"
+// @Success 201 {object} sqlc.Student
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /student_reg [post]
 func (h *studentHandler) CreateStudent(ctx *gin.Context) {
 	var req CreateStudentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	// 1. Fetch user by email
 	user, err := h.store.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "user not found", err))
 		return
 	}
 
 	// 1.1 Check if user is a student
 	if user.UserRole != sqlc.UserroleStudent {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "only students can complete student profile"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "only students can complete student profile", nil))
 		return
 	}
 
 	// 1.2 Check if profile is already completed
 	if user.IsProfileCompleted {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "profile already completed"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "profile already completed", nil))
 		return
 	}
 
 	// 2. Fetch branch by code
 	branch, err := h.store.GetBranchByCode(ctx, strings.ToUpper(req.BranchCode))
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "branch not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "branch not found", err))
 		return
 	}
 
@@ -71,7 +85,7 @@ func (h *studentHandler) CreateStudent(ctx *gin.Context) {
 	}
 	semester, err := h.store.GetSemesterByNumberAndBranch(ctx, semArg)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("semester %d not found for branch %s", req.SemesterNo, req.BranchCode)})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, fmt.Sprintf("semester %d not found for branch %s", req.SemesterNo, req.BranchCode), err))
 		return
 	}
 
@@ -116,23 +130,35 @@ func (h *studentHandler) CreateStudent(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, student)
 }
 
+// GetStudentByRollNo returns student details by roll number
+// @Summary Get student by roll number
+// @Description Fetch student details using their roll number
+// @Tags students
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param roll_no path string true "Roll Number"
+// @Success 200 {object} sqlc.Student
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /student/{roll_no} [get]
 func (h *studentHandler) GetStudentByRollNo(ctx *gin.Context) {
 	rollNo := ctx.Param("roll_no")
 	if rollNo == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "roll_no is required"})
+		ctx.Error(middleware.NewAPIError(http.StatusBadRequest, "roll_no is required", nil))
 		return
 	}
 
 	student, err := h.store.GetStudentByRollNo(ctx, rollNo)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "student not found"})
+		ctx.Error(middleware.NewAPIError(http.StatusNotFound, "student not found", err))
 		return
 	}
 

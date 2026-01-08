@@ -24,7 +24,7 @@ INSERT INTO teachers(
 ) VALUES (
 $1,$2,$3,$4,$5,$6,$7
 )
-RETURNING id, card_no, first_name, middle_name, last_name, image, user_id, department_id, rfid_tag_id, fingerprint_hash, created_at, updated_at
+RETURNING id, card_no, first_name, middle_name, last_name, image, user_id, department_id, rfid_tag_id, fingerprint_hash, created_at, updated_at, deleted_at
 `
 
 type CreateTeacherParams struct {
@@ -61,13 +61,14 @@ func (q *Queries) CreateTeacher(ctx context.Context, arg CreateTeacherParams) (T
 		&i.FingerprintHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getTeacherByCardNo = `-- name: GetTeacherByCardNo :one
-SELECT id, card_no, first_name, middle_name, last_name, image, user_id, department_id, rfid_tag_id, fingerprint_hash, created_at, updated_at FROM teachers
-WHERE card_no = $1
+SELECT id, card_no, first_name, middle_name, last_name, image, user_id, department_id, rfid_tag_id, fingerprint_hash, created_at, updated_at, deleted_at FROM teachers
+WHERE card_no = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -87,6 +88,7 @@ func (q *Queries) GetTeacherByCardNo(ctx context.Context, cardNo string) (Teache
 		&i.FingerprintHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

@@ -19,7 +19,7 @@ INSERT INTO departments (
 ) VALUES (
 $1, $2,$3
 )
-RETURNING id, name, hod_name, hod_id, dhod_name, dhod_id, created_at, updated_at
+RETURNING id, name, hod_name, hod_id, dhod_name, dhod_id, created_at, updated_at, deleted_at
 `
 
 type CreateDepartmentParams struct {
@@ -40,13 +40,14 @@ func (q *Queries) CreateDepartment(ctx context.Context, arg CreateDepartmentPara
 		&i.DhodID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getDepartmentByName = `-- name: GetDepartmentByName :one
-SELECT id, name, hod_name, hod_id, dhod_name, dhod_id, created_at, updated_at FROM departments
-WHERE name = $1 LIMIT 1
+SELECT id, name, hod_name, hod_id, dhod_name, dhod_id, created_at, updated_at, deleted_at FROM departments
+WHERE name = $1 AND deleted_at IS NULL LIMIT 1
 `
 
 func (q *Queries) GetDepartmentByName(ctx context.Context, name string) (Department, error) {
@@ -61,6 +62,7 @@ func (q *Queries) GetDepartmentByName(ctx context.Context, name string) (Departm
 		&i.DhodID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
